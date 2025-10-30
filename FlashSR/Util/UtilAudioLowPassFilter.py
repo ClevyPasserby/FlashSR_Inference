@@ -37,14 +37,18 @@ class UtilAudioLowPassFilter:
     
     @staticmethod
     def lowpass_filter(x:ndarray, #[time] 1d array
-                       highcutoff_freq:float, #high cutoff frequency
-                       fs:int, 
-                       order:int, #the order of filter
-                       ftype:Literal['butter', 'cheby1', 'cheby2', 'ellip', 'bessel'],
-                       upsample_to_original:bool = True
-                       ) -> ndarray: #[time] 1d array
+                   highcutoff_freq:float, #high cutoff frequency
+                   fs:int, 
+                   order:int, #the order of filter
+                   ftype:Literal['butter', 'cheby1', 'cheby2', 'ellip', 'bessel'],
+                   upsample_to_original:bool = True
+                   ) -> ndarray: #[time] 1d array
         nyq = 0.5 * fs
+        # Ensure hi is between 0 and 1 (exclusive)
         hi = highcutoff_freq / nyq
+        hi = min(hi, 0.999)  # Clamp to just below 1
+        hi = max(hi, 0.001)  # Clamp to just above 0
+    
         if ftype == "butter":
             sos = butter(order, hi, btype="low", output="sos")
         elif ftype == "cheby1":
